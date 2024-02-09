@@ -117,6 +117,45 @@ def description(interfacename, namespace, display, verbose):
         cmd += ['-n', str(namespace)]
 
     clicommon.run_command(cmd, display_cmd=verbose)
+# 'txerror' subcommand ("show interfaces txerror")
+@interfaces.command('tx_error')
+@click.argument('interfacename', required=False)
+def tx_error(interfacename):
+    """Show Interface tx_error information"""
+
+    state_db = SonicV2Connector(host='127.0.0.1')
+    state_db.connect(state_db.STATE_DB, False)   # Make one attempt only
+    prefix_statedb = "TX_ERR_STATE|"
+    _hash = '{}{}'.format(prefix_statedb, '*')
+    # DBInterface keys() method
+    txerr_keys = state_db.keys(state_db.STATE_DB, _hash)
+    appl_db = SonicV2Connector(host='127.0.0.1')
+    appl_db.connect(appl_db.APPL_DB, False)
+    prefix_appldb = "TX_ERR_APPL:"
+    _hash = '{}{}'.format(prefix_statedb, "*")
+    #txerr_appl_keys = appl_db.keys(appl_db.APPL_DB, _hash)
+    table = []
+    for k in txerr_keys:
+        k = k.replace(prefix_statedb, "")
+        r = []
+        r.append(k)
+        state_db_entry_status = state_db.get(state_db.STATE_DB, prefix_statedb + k, "tx_status")
+        if "0" == state_db_entry_status:
+            r.append("OK")
+        else:
+            r.append("NOT OK")
+
+        
+        app_db_entry = appl_db.get_all(appl_db.APPL_DB, prefix_appldb + k)
+        if 'tx_error_stati' not in app_db_entry:
+            r.append("")
+        else:
+            r.append(app_db_entry['tx_error_stati'])
+
+        table.append(r)
+
+    header = ['Port', 'status', 'statistics']
+    click.echo(tabulate(table, header))
 
 # 'naming_mode' subcommand ("show interfaces naming_mode")
 @interfaces.command('naming_mode')

@@ -1183,7 +1183,7 @@ def config(ctx):
 
     ctx.obj = Db()
 
-
+    
 # Add groups from other modules
 config.add_command(aaa.aaa)
 config.add_command(aaa.tacacs)
@@ -1683,15 +1683,17 @@ def load_mgmt_config(filename):
         clicommon.run_command(command, display_cmd=True, ignore_error=True)
     if len(config_data['MGMT_INTERFACE'].keys()) > 0:
         filepath = '/var/run/dhclient.eth0.pid'
-        if os.path.isfile(filepath):
-            out0, rc0 = clicommon.run_command(['cat', filepath], display_cmd=True, return_cmd=True)
-            if rc0 != 0:
-                sys.exit('Exit: {}. Command: cat {} failed.'.format(rc0, filepath))
+        if not os.path.isfile(filepath):
+            sys.exit('File {} does not exist'.format(filepath))
 
-            out1, rc1 = clicommon.run_command(['kill', str(out0).strip('\n')], display_cmd=True, return_cmd=True)
-            if rc1 != 0:
-                sys.exit('Exit: {}. Command: kill {} failed.'.format(rc1, out0))
-            clicommon.run_command(['rm', '-f', filepath], display_cmd=True, return_cmd=True)
+        out0, rc0 = clicommon.run_command(['cat', filepath], display_cmd=True, return_cmd=True)
+        if rc0 != 0:
+            sys.exit('Exit: {}. Command: cat {} failed.'.format(rc0, filepath))
+
+        out1, rc1 = clicommon.run_command(['kill', str(out0).strip('\n')], return_cmd=True)
+        if rc1 != 0:
+            sys.exit('Exit: {}. Command: kill {} failed.'.format(rc1, out0))
+        clicommon.run_command(['rm', '-f', filepath], display_cmd=True, return_cmd=True)
     click.echo("Please note loaded setting will be lost after system reboot. To preserve setting, run `config save`.")
 
 @config.command("load_minigraph")
@@ -5428,6 +5430,86 @@ def disable_use_link_local_only(ctx, interface_name):
 
     interface_dict = db.get_table(interface_type)
     set_ipv6_link_local_only_on_interface(db, interface_dict, interface_type, interface_name, "disable")
+
+#
+# 'tx_error_threshold' subgroup
+#
+
+@interface.group('tx_error_threshold')
+@click.pass_context
+def tx_error_threshold(ctx):
+    """Set or del threshold of tx error statistics"""
+    pass
+
+#
+# 'set' subcommand
+#
+@tx_error_threshold.command()
+@click.argument('interface_name', metavar='<interface_name>', required=True)
+@click.argument('interface_tx_err_threshold', metavar='<interface_tx_err_threshold>', required=True, type=int)
+@click.pass_context
+def set_thresh(ctx, interface_name, interface_tx_err_threshold):
+    
+    """Set threshold of tx error statistics"""
+    if interface_name is None:
+        ctx.fail("'interface_name' is None!")
+
+    config_db = ctx.obj['config_db']
+    if clicommon.get_interface_naming_mode() == "alias":
+        interface_name = interface_alias_to_name(interface_name)
+        if interface_name is None:
+            ctx.fail("'interface_name' is None!")
+
+    if interface_name_is_valid(config_db,interface_name) is False:
+        ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
+
+    if interface_name.startswith("Ethernet"):
+        config_db.set_entry("TX_ERR_CFG", (interface_name), {"port_tx_error_threshold": interface_tx_err_threshold})
+    else:
+        ctx.fail("Only Ethernet interfaces are supported")
+
+#
+# 'clear' subcommand
+#
+@tx_error_threshold.command()
+@click.pass_context
+@click.argument('interface_name', metavar='<interface_name>', required=True)
+def clear_thresh(ctx, interface_name):
+    """Clear threshold of tx error statistics"""
+    if interface_name is None:
+        ctx.fail("'interface_name' is None!")
+
+    config_db = ctx.obj["config_db"]
+    if clicommon.get_interface_naming_mode() == "alias":
+        interface_name = interface_alias_to_name(interface_name)
+        if interface_name is None:
+            ctx.fail("'interface_name' is None!")
+
+    if interface_name_is_valid(config_db,interface_name) is False:
+        ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
+
+    if config_db.get_entry('TX_ERR_CFG', interface_name):
+        if interface_name.startswith("Ethernet"):
+            config_db.set_entry("TX_ERR_CFG", (interface_name), None)
+        else:
+            ctx.fail("Only Ethernet interfaces are supported")
+    else:
+        ctx.fail("Tx Error threshold hasn't been configured on the interface")
+
+
+        
+        
+
+# 'tx_error_stat_poll_period' subcommand ('config tx_error_stat_poll_period')
+#
+@config.command('tx_error_stat_poll_period')
+@click.argument('period', metavar='<period>', required=True, type=int)
+def tx_error_stat_poll_period(period):
+    """Set polling period of tx error statistics, 0 for disable, xxx for default"""
+    config_db = ConfigDBConnector()
+    config_db.connect()
+    config_db.set_entry("TX_ERR_CFG", ("GLOBAL_PERIOD"), {"port_tx_error_check_period": period})
+
 
 #
 # 'vrf' group ('config vrf ...')
