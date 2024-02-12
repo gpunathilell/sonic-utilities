@@ -5430,7 +5430,7 @@ def disable_use_link_local_only(ctx, interface_name):
     set_ipv6_link_local_only_on_interface(db, interface_dict, interface_type, interface_name, "disable")
 
 #
-# 'tx_error_threshold' subgroup
+# 'tx_error_threshold' subgroup ('config tx_error_threshold <interface_name> ...')
 #
 
 @interface.group('tx_error_threshold')
@@ -5440,7 +5440,7 @@ def tx_error_threshold(ctx):
     pass
 
 #
-# 'set' subcommand
+# 'set_thresh' subcommand
 #
 
 @tx_error_threshold.command()
@@ -5468,7 +5468,7 @@ def set_thresh(ctx, interface_name, interface_tx_err_threshold):
         ctx.fail("Only Ethernet interfaces are supported")
 
 #
-# 'clear' subcommand
+# 'clear_thresh' subcommand
 #
         
 @tx_error_threshold.command()
