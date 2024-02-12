@@ -1183,7 +1183,7 @@ def config(ctx):
 
     ctx.obj = Db()
 
-    
+
 # Add groups from other modules
 config.add_command(aaa.aaa)
 config.add_command(aaa.tacacs)
@@ -5442,17 +5442,18 @@ def tx_error_threshold(ctx):
 #
 # 'set' subcommand
 #
+
 @tx_error_threshold.command()
 @click.argument('interface_name', metavar='<interface_name>', required=True)
 @click.argument('interface_tx_err_threshold', metavar='<interface_tx_err_threshold>', required=True, type=int)
 @click.pass_context
 def set_thresh(ctx, interface_name, interface_tx_err_threshold):
-    
+    config_db = ctx.obj['config_db']
+
     """Set threshold of tx error statistics"""
     if interface_name is None:
         ctx.fail("'interface_name' is None!")
 
-    config_db = ctx.obj['config_db']
     if clicommon.get_interface_naming_mode() == "alias":
         interface_name = interface_alias_to_name(interface_name)
         if interface_name is None:
@@ -5469,6 +5470,7 @@ def set_thresh(ctx, interface_name, interface_tx_err_threshold):
 #
 # 'clear' subcommand
 #
+        
 @tx_error_threshold.command()
 @click.pass_context
 @click.argument('interface_name', metavar='<interface_name>', required=True)
@@ -5476,13 +5478,11 @@ def clear_thresh(ctx, interface_name):
     """Clear threshold of tx error statistics"""
     if interface_name is None:
         ctx.fail("'interface_name' is None!")
-
     config_db = ctx.obj["config_db"]
     if clicommon.get_interface_naming_mode() == "alias":
         interface_name = interface_alias_to_name(interface_name)
         if interface_name is None:
             ctx.fail("'interface_name' is None!")
-
     if interface_name_is_valid(config_db,interface_name) is False:
         ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
 
@@ -5494,12 +5494,10 @@ def clear_thresh(ctx, interface_name):
     else:
         ctx.fail("Tx Error threshold hasn't been configured on the interface")
 
-
-        
-        
-
+#
 # 'tx_error_stat_poll_period' subcommand ('config tx_error_stat_poll_period')
 #
+        
 @config.command('tx_error_stat_poll_period')
 @click.argument('period', metavar='<period>', required=True, type=int)
 def tx_error_stat_poll_period(period):
@@ -5507,7 +5505,6 @@ def tx_error_stat_poll_period(period):
     config_db = ConfigDBConnector()
     config_db.connect()
     config_db.set_entry("TX_ERR_CFG", ("GLOBAL_PERIOD"), {"port_tx_error_check_period": period})
-
 
 #
 # 'vrf' group ('config vrf ...')

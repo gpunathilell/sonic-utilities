@@ -117,7 +117,10 @@ def description(interfacename, namespace, display, verbose):
         cmd += ['-n', str(namespace)]
 
     clicommon.run_command(cmd, display_cmd=verbose)
-# 'txerror' subcommand ("show interfaces txerror")
+
+#
+# 'txerror' subcommand ("show interfaces tx_error")
+#
 @interfaces.command('tx_error')
 @click.argument('interfacename', required=False)
 def tx_error(interfacename):
