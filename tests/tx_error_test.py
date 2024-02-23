@@ -54,8 +54,6 @@ class TestTxErrorConfig(object):
             exec_cmd = config.config.commands["interface"].commands["tx_error_threshold"].commands["set-thresh"]
         elif 'tx_error_clear' in input['cmd']:
             exec_cmd = config.config.commands["interface"].commands["tx_error_threshold"].commands["clear-thresh"]
-        elif 'tx_error_clear' in input['cmd']:
-            exec_cmd = config.config.commands["interface"].commands["tx_error_threshold"].commands["clear-thresh"]
         elif 'tx_error_clear_error' in input['cmd']:
             exec_cmd = config.config.commands["interface"].commands["tx_error_threshold"].commands["clear-thresh"]
         if 'args' in input.keys():
