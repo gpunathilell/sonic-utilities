@@ -2709,5 +2709,11 @@
         "dhcpv6_servers": [
             "fc02:2000::1"
         ]
+    },
+    "TX_ERR_CFG|GLOBAL_PERIOD": {
+        "port_tx_error_check_period": "20"
+    },
+    "TX_ERR_CFG|Ethernet0": {
+        "port_tx_error_threshold": "5"
     }
 }
