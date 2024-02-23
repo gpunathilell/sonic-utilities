@@ -5439,33 +5439,50 @@ def tx_error_threshold(ctx):
     """Set or del threshold of tx error statistics"""
     pass
 
+def set_or_clear_threshold(ctx, interface_name, interface_tx_err_threshold):
+    config_db = ConfigDBConnector()
+    config_db.connect()
+    #config_db = ctx.obj['config_db']
+
+    """Set/Clear threshold of tx error statistics"""
+    if not interface_name:
+        ctx.fail("'interface_name' is None!")
+
+    if clicommon.get_interface_naming_mode() == "alias":
+        interface_name = interface_alias_to_name(interface_name)
+        if not interface_name:
+            ctx.fail("'interface_name' is None!")
+
+    if not interface_name_is_valid(config_db,interface_name):
+        ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
+    if interface_tx_err_threshold:
+        if interface_name.startswith("Ethernet"):
+            config_db.set_entry("TX_ERR_CFG", (interface_name), {"port_tx_error_threshold": interface_tx_err_threshold})
+        else:
+            ctx.fail("Only Ethernet interfaces are supported")
+    else:
+        if config_db.get_entry('TX_ERR_CFG', interface_name):
+            if interface_name.startswith("Ethernet"):
+                config_db.set_entry("TX_ERR_CFG", (interface_name), None)
+            else:
+                ctx.fail("Only Ethernet interfaces are supported")
+        else:
+            ctx.fail("Tx Error threshold hasn't been configured on the interface")
+    
+
+
 #
 # 'set_thresh' subcommand
 #
+
 
 @tx_error_threshold.command()
 @click.argument('interface_name', metavar='<interface_name>', required=True)
 @click.argument('interface_tx_err_threshold', metavar='<interface_tx_err_threshold>', required=True, type=int)
 @click.pass_context
 def set_thresh(ctx, interface_name, interface_tx_err_threshold):
-    config_db = ctx.obj['config_db']
-
     """Set threshold of tx error statistics"""
-    if interface_name is None:
-        ctx.fail("'interface_name' is None!")
-
-    if clicommon.get_interface_naming_mode() == "alias":
-        interface_name = interface_alias_to_name(interface_name)
-        if interface_name is None:
-            ctx.fail("'interface_name' is None!")
-
-    if interface_name_is_valid(config_db,interface_name) is False:
-        ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
-
-    if interface_name.startswith("Ethernet"):
-        config_db.set_entry("TX_ERR_CFG", (interface_name), {"port_tx_error_threshold": interface_tx_err_threshold})
-    else:
-        ctx.fail("Only Ethernet interfaces are supported")
+    set_or_clear_threshold(ctx, interface_name, interface_tx_err_threshold)
 
 #
 # 'clear_thresh' subcommand
@@ -5476,23 +5493,7 @@ def set_thresh(ctx, interface_name, interface_tx_err_threshold):
 @click.argument('interface_name', metavar='<interface_name>', required=True)
 def clear_thresh(ctx, interface_name):
     """Clear threshold of tx error statistics"""
-    if interface_name is None:
-        ctx.fail("'interface_name' is None!")
-    config_db = ctx.obj["config_db"]
-    if clicommon.get_interface_naming_mode() == "alias":
-        interface_name = interface_alias_to_name(interface_name)
-        if interface_name is None:
-            ctx.fail("'interface_name' is None!")
-    if interface_name_is_valid(config_db,interface_name) is False:
-        ctx.fail("Interface name is invalid. Please enter a valid interface name!!")
-
-    if config_db.get_entry('TX_ERR_CFG', interface_name):
-        if interface_name.startswith("Ethernet"):
-            config_db.set_entry("TX_ERR_CFG", (interface_name), None)
-        else:
-            ctx.fail("Only Ethernet interfaces are supported")
-    else:
-        ctx.fail("Tx Error threshold hasn't been configured on the interface")
+    set_or_clear_threshold(ctx, interface_name, None)    
 
 #
 # 'tx_error_stat_poll_period' subcommand ('config tx_error_stat_poll_period')
@@ -5501,7 +5502,7 @@ def clear_thresh(ctx, interface_name):
 @config.command('tx_error_stat_poll_period')
 @click.argument('period', metavar='<period>', required=True, type=int)
 def tx_error_stat_poll_period(period):
-    """Set polling period of tx error statistics, 0 for disable, xxx for default"""
+    """Set polling period of tx error statistics, 0 for disable, 20 for default"""
     config_db = ConfigDBConnector()
     config_db.connect()
     config_db.set_entry("TX_ERR_CFG", ("GLOBAL_PERIOD"), {"port_tx_error_check_period": period})

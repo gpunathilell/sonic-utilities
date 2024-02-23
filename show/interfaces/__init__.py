@@ -129,16 +129,13 @@ def tx_error(interfacename):
     state_db = SonicV2Connector(host='127.0.0.1')
     state_db.connect(state_db.STATE_DB, False)   # Make one attempt only
     prefix_statedb = "TX_ERR_STATE|"
-    _hash = '{}{}'.format(prefix_statedb, '*')
-    # DBInterface keys() method
-    txerr_keys = state_db.keys(state_db.STATE_DB, _hash)
+    hash_value = '{}*'.format(prefix_statedb, '*')
+    txerr_keys = state_db.keys(state_db.STATE_DB, hash_value)
     appl_db = SonicV2Connector(host='127.0.0.1')
     appl_db.connect(appl_db.APPL_DB, False)
     prefix_appldb = "TX_ERR_APPL:"
-    _hash = '{}{}'.format(prefix_statedb, "*")
-    #txerr_appl_keys = appl_db.keys(appl_db.APPL_DB, _hash)
     table = []
-    for k in txerr_keys:
+    for k in (txerr_keys or []):
         k = k.replace(prefix_statedb, "")
         r = []
         r.append(k)
