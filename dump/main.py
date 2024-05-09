@@ -174,6 +174,8 @@ def populate_fv(info, module, namespace, conn_pool, is_dash_object):
                 elif not is_dash_object:
                     fv = db_conn.get_all(db_name, key)
                 else:
+                    fv = db_conn.get_all(db_name, key)
+                    print(db_conn.get_all(db_name, key))
                     fv = get_decoded_value(key,is_dash_object)
                 final_info[id][db_name]["keys"].append({key: fv})
 

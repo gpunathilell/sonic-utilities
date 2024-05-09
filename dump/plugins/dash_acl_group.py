@@ -5,7 +5,6 @@ import dash_api
 from dash_api.acl_group_pb2 import AclGroup
 from dump.match_helper import fetch_acl_counter_oid
 from .executor import Executor
-from dump.dash_util import beautifiers
 import redis
 from dump.match_infra import JsonSource, MatchEngine, CONN
 from google.protobuf.json_format import MessageToDict

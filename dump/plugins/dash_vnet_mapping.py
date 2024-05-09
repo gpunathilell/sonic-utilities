@@ -5,7 +5,6 @@ import dash_api
 from dash_api.vnet_mapping_pb2 import VnetMapping
 from dump.match_helper import fetch_acl_counter_oid
 from .executor import Executor
-from dump.dash_util import beautifiers
 import redis
 from dump.match_infra import JsonSource, MatchEngine, CONN
 from google.protobuf.json_format import MessageToDict
@@ -27,7 +26,8 @@ class Dash_Vnet_mapping(Executor):
         req = MatchRequest(db="APPL_DB", table="DASH_VNET_MAPPING_TABLE", key_pattern="*", ns=ns)
         ret = self.match_engine.fetch(req)
         appliance_tables = ret["keys"]
-        return [key.split(APPL_DB_SEPARATOR)[-1] for key in appliance_tables]
+        print(appliance_tables)
+        return [key.split(APPL_DB_SEPARATOR, 1)[1] for key in appliance_tables]
 
     def execute(self, params):
         self.ret_temp = create_template_dict(dbs=["APPL_DB"])
@@ -42,4 +42,4 @@ class Dash_Vnet_mapping(Executor):
         self.add_to_ret_template(req.table, req.db, ret["keys"], ret["error"])
 
     def return_pb2_obj(self):
-        return None
+        return VnetMapping()

@@ -5,7 +5,6 @@ import dash_api
 from dash_api.route_pb2 import Route
 from dump.match_helper import fetch_acl_counter_oid
 from .executor import Executor
-from dump.dash_util import beautifiers
 from dump.match_infra import JsonSource, MatchEngine, CONN
 
 
