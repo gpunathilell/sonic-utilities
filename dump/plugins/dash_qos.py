@@ -28,10 +28,10 @@ class Dash_Qos(Executor):
         self.ret_temp = create_template_dict(dbs=["APPL_DB"])
         dash_qos_table_name = params[self.ARG_NAME]
         self.ns = params["namespace"]
-        self.init_dash_qos_table_config_info(dash_qos_table_name)
+        self.init_dash_qos_table_appl_info(dash_qos_table_name)
         return self.ret_temp
 
-    def init_dash_qos_table_config_info(self, dash_qos_table_name):
+    def init_dash_qos_table_appl_info(self, dash_qos_table_name):
         req = MatchRequest(db="APPL_DB", table="DASH_QOS_TABLE", key_pattern=dash_qos_table_name, return_fields=["type"], ns=self.ns)
         ret = self.match_engine.fetch(req)
         self.add_to_ret_template(req.table, req.db, ret["keys"], ret["error"])

@@ -11,7 +11,7 @@ APPL_DB_SEPARATOR = SonicDBConfig.getSeparator("APPL_DB")
 
 class Dash_Acl_Out(Executor):
     """
-    Debug Dump Plugin for DASH ACL Rule
+    Debug Dump Plugin for DASH ACL Out Rule
     """
     ARG_NAME = "dash_acl_out"
 
@@ -29,10 +29,10 @@ class Dash_Acl_Out(Executor):
         self.ret_temp = create_template_dict(dbs=["APPL_DB"])
         dash_acl_out_table_name = params[self.ARG_NAME]
         self.ns = params["namespace"]
-        self.init_dash_acl_out_table_config_info(dash_acl_out_table_name)
+        self.init_dash_acl_out_table_appl_info(dash_acl_out_table_name)
         return self.ret_temp
 
-    def init_dash_acl_out_table_config_info(self, dash_acl_out_table_name):
+    def init_dash_acl_out_table_appl_info(self, dash_acl_out_table_name):
         req = MatchRequest(db="APPL_DB", table="DASH_ACL_OUT_TABLE", key_pattern=dash_acl_out_table_name, ns=self.ns)
         ret = self.match_engine.fetch(req)
         self.add_to_ret_template(req.table, req.db, ret["keys"], ret["error"])

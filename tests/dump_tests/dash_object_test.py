@@ -1,10 +1,11 @@
 import os
 import sys
-import unittest
 import pytest
-from dump.match_infra import MatchEngine, EXCEP_DICT, MatchRequest, MatchRequestOptimizer, ConnectionPool, CONN
+from dump.match_infra import MatchEngine, MatchRequest, ConnectionPool, CONN
 from dump.plugins.dash_acl_out import Dash_Acl_Out
+from dump.plugins.dash_acl_in import Dash_Acl_In
 from dump.plugins.dash_acl_group import Dash_Acl_Group
+from dump.plugins.dash_prefix_tag import Dash_Prefix_Tag
 from dump.plugins.dash_acl_rule import Dash_Acl_Rule
 from dump.plugins.dash_appliance import Dash_Appliance
 from dump.plugins.dash_eni import Dash_Eni
@@ -14,9 +15,6 @@ from dump.plugins.dash_vnet_mapping import Dash_Vnet_mapping
 from dump.plugins.dash_route import Dash_Route
 from utilities_common.constants import DEFAULT_NAMESPACE
 from dump.helper import populate_mock
-from unittest.mock import MagicMock
-from deepdiff import DeepDiff
-from importlib import reload
 from .mock_redis import RedisMock
 from click.testing import CliRunner
 from .dump_state_test import compare_json_output
@@ -83,6 +81,28 @@ class TestMatchEngineDash:
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
 
+    def test_acl_in(self, match_engine):
+        req = MatchRequest(db="APPL_DB", table="DASH_ACL_IN_TABLE", key_pattern="*", pb=Dash_Acl_In())
+        ret = match_engine.fetch(req)
+        assert ret["error"] == ""
+        assert len(ret["keys"]) == 1
+        assert "DASH_ACL_IN_TABLE:F4939FEFC47E:1" in ret['keys']
+        runner = CliRunner()
+        result = runner.invoke(dump.state, ["dash_acl_in", "all"], obj=match_engine)
+        assert result.exit_code == 0, "exit code: {}, Exception: {}, Traceback: {}".format(result.exit_code, result.exception, result.exc_info)
+        expected = {"F4939FEFC47E:1":
+                    {
+                        "APPL_DB":
+                            {"keys":
+                                [{"DASH_ACL_IN_TABLE:F4939FEFC47E:1":
+                                    {"v4_acl_group_id": "default_acl_group"}}],
+                                "tables_not_found": []
+                             }
+                    }
+                    }
+        ddiff = compare_json_output(expected, result.output)
+        assert not ddiff, ddiff
+
     def test_acl_group(self, match_engine):
         req = MatchRequest(db="APPL_DB", table="DASH_ACL_GROUP_TABLE", key_pattern="*", pb=Dash_Acl_Group())
         ret = match_engine.fetch(req)
@@ -124,7 +144,8 @@ class TestMatchEngineDash:
                             {
                                 "keys":
                                 [
-                                    {"DASH_ACL_RULE_TABLE:group1:rule1":
+                                    {
+                                        "DASH_ACL_RULE_TABLE:group1:rule1":
                                         {
                                             "action": "ACTION_PERMIT",
                                             "terminating": True,
@@ -132,7 +153,7 @@ class TestMatchEngineDash:
                                             "dst_addr": ["0.0.0.0/0"],
                                             "src_port": [{"value": 80}],
                                             "dst_port": [{"value": 5355}],
-                                            }
+                                        }
                                     }
                                 ],
                                 "tables_not_found": []
@@ -155,15 +176,20 @@ class TestMatchEngineDash:
         expected = {"123":
                     {
                         "APPL_DB":
-                            {"keys":
-                                [
-                                    {"DASH_APPLIANCE_TABLE:123":
-                                        {"sip": "10.1.0.32",
-                                         "vm_vni": 101,
-                                         }}],
-                                "tables_not_found": []
+                        {
+                            "keys":
+                            [
+                                {
+                                    "DASH_APPLIANCE_TABLE:123":
+                                    {
+                                        "sip": "10.1.0.32",
+                                        "vm_vni": 101,
+                                    }
                                 }
-                     }
+                            ],
+                            "tables_not_found": []
+                        }
+                    }
                     }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
@@ -192,7 +218,7 @@ class TestMatchEngineDash:
                                          "vnet": "Vnet1",
                                          }}],
                                 "tables_not_found": []
-                                },
+                             },
                         "ASIC_DB":
                             {"keys":
                                 [
@@ -203,11 +229,12 @@ class TestMatchEngineDash:
                                          "SAI_ENI_ATTR_VNET_ID": "oid:0x7a000000000021",
                                          }}],
                                 "tables_not_found": [],
-                                 "vidtorid": {
+                                "vidtorid":
+                                {
                                     "oid:0x73000000000022": "Real ID Not Found"
-                                 }
                                 }
-                     }
+                             }
+                    }
                     }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
@@ -234,8 +261,8 @@ class TestMatchEngineDash:
                                          "flows": 10,
                                          }}],
                                 "tables_not_found": []
-                                }
-                     }
+                             }
+                    }
                     }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
@@ -260,8 +287,8 @@ class TestMatchEngineDash:
                                          "vnet": "Vnet1",
                                          }}],
                                 "tables_not_found": []
-                                }
-                     }
+                             }
+                    }
                     }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
@@ -288,8 +315,36 @@ class TestMatchEngineDash:
                                          "use_dst_vni": True,
                                          }}],
                                 "tables_not_found": []
-                                }
-                     }
+                             }
+                    }
+                    }
+        ddiff = compare_json_output(expected, result.output)
+        assert not ddiff, ddiff
+
+    def test_acl_prefix_tag(self, match_engine):
+        req = MatchRequest(db="APPL_DB", table="DASH_PREFIX_TAG_TABLE", key_pattern="*", pb=Dash_Prefix_Tag())
+        ret = match_engine.fetch(req)
+        assert ret["error"] == ""
+        assert len(ret["keys"]) == 1
+        assert "DASH_PREFIX_TAG_TABLE:AclTagScale1798" in ret['keys']
+        runner = CliRunner()
+        result = runner.invoke(dump.state, ["dash_prefix_tag", "all"], obj=match_engine)
+        assert result.exit_code == 0, "exit code: {}, Exception: {}, Traceback: {}".format(result.exit_code, result.exception, result.exc_info)
+        print(f"Res op {result.output}")
+        expected = {"AclTagScale1798":
+                    {
+                        "APPL_DB":
+                            {"keys":
+                                [
+                                    {"DASH_PREFIX_TAG_TABLE:AclTagScale1798":
+                                        {"ip_version": "IP_VERSION_IPV4",
+                                         "prefix_list": [
+                                             "8.0.0.107/32"
+                                         ]
+                                         }}],
+                                "tables_not_found": []
+                             }
+                    }
                     }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff
@@ -298,7 +353,7 @@ class TestMatchEngineDash:
         req = MatchRequest(db="APPL_DB", table="DASH_VNET_TABLE", key_pattern="*", pb=Dash_Vnet())
         ret = match_engine.fetch(req)
         assert ret["error"] == ""
-        assert len(ret["keys"]) == 1
+        assert len(ret["keys"]) == 2
         assert "DASH_VNET_TABLE:Vnet1" in ret['keys']
         runner = CliRunner()
         result = runner.invoke(dump.state, ["dash_vnet", "all"], obj=match_engine)
@@ -314,7 +369,7 @@ class TestMatchEngineDash:
                                          "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
                                          }}],
                                 "tables_not_found": []
-                                },
+                             },
                         "ASIC_DB":
                             {"keys":
                                 [
@@ -322,11 +377,28 @@ class TestMatchEngineDash:
                                         {"SAI_VNET_ATTR_VNI": "1000",
                                          }}],
                                 "tables_not_found": [],
-                                 "vidtorid": {
+                                "vidtorid": {
                                     "oid:0x7a000000000021": "Real ID Not Found"
-                                 }
-                            }
-                     }
-        }
+                                }
+                             }
+                    },
+                    "Vnet2":
+                    {
+                        "APPL_DB":
+                            {"keys":
+                                [
+                                    {"DASH_VNET_TABLE:Vnet2":
+                                        {"vni": 2000,
+                                         "guid": "659c6ce8-26ab-4193-b946-ccc6e8f930b2",
+                                         }}],
+                                "tables_not_found": []
+                             },
+                        "ASIC_DB":
+                            {"keys":
+                                [],
+                                "tables_not_found": ["ASIC_STATE:SAI_OBJECT_TYPE_VNET"],
+                             }
+                    }
+                    }
         ddiff = compare_json_output(expected, result.output)
         assert not ddiff, ddiff

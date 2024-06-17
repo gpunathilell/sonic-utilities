@@ -3,7 +3,7 @@ import os
 import pytest
 from deepdiff import DeepDiff
 from dump.helper import create_template_dict, populate_mock
-from dump.plugins.dash_vnet import Dash_Vnet
+from dump.plugins.dash_route_rule import Dash_Route_Rule
 from dump.match_infra import MatchEngine, ConnectionPool
 from swsscommon.swsscommon import SonicV2Connector
 from utilities_common.constants import DEFAULT_NAMESPACE
@@ -32,8 +32,7 @@ def match_engine():
     from ...mock_tables import dbconnector
     db = SonicV2Connector()
     from ...dump_tests import mock_redis
-    redis_obj = mock_redis.RedisMock()
-    redis_obj.load_file(dedicated_dbs['APPL_DB'])
+    redis.Redis = mock_redis.RedisMock
 
     # popualate the db with mock data
     db_names = list(dedicated_dbs.keys())
@@ -45,7 +44,6 @@ def match_engine():
     # Initialize connection pool
     conn_pool = ConnectionPool()
     conn_pool.fill(DEFAULT_NAMESPACE, db, db_names)
-    conn_pool.fill(DEFAULT_NAMESPACE, redis_obj, None, dash_object=True)
 
     # Initialize match_engine
     match_engine = MatchEngine(conn_pool)
@@ -55,43 +53,28 @@ def match_engine():
 
 
 @pytest.mark.usefixtures("match_engine")
-class TestDashVnetModule:
+class TestDashAclRuleModule:
     def test_working_state(self, match_engine):
         """
         Scenario: When the appl info is properly applied and propagated
         """
-        params = {Dash_Vnet.ARG_NAME: "Vnet1", "namespace": ""}
-        m_dash_vnet = Dash_Vnet(match_engine)
-        returned = m_dash_vnet.execute(params)
-        expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
-        expect["APPL_DB"]["keys"].append("DASH_VNET_TABLE:Vnet1")
-        expect["ASIC_DB"]["keys"].append("ASIC_STATE:SAI_OBJECT_TYPE_VNET:oid:0x7a000000000021")
+        params = {Dash_Route_Rule.ARG_NAME: "F4939FEFC47E:2000:10.0.2.0/24", "namespace": ""}
+        m_dash_route_rule = Dash_Route_Rule(match_engine)
+        returned = m_dash_route_rule.execute(params)
+        expect = create_template_dict(dbs=["APPL_DB"])
+        expect["APPL_DB"]["keys"].append("DASH_ROUTE_RULE_TABLE:F4939FEFC47E:2000:10.0.2.0/24")
         ddiff = DeepDiff(returned, expect, ignore_order=True)
-        assert not ddiff, ddiff
-
-    def test_absent_asic_keys(self, match_engine):
-        """
-        Scenario: Missing ASIC_DB Keys
-        """
-        params = {Dash_Vnet.ARG_NAME: "Vnet2", "namespace": ""}
-        m_dash_vnet = Dash_Vnet(match_engine)
-        returned = m_dash_vnet.execute(params)
-        expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
-        expect["APPL_DB"]["keys"].append("DASH_VNET_TABLE:Vnet2")
-        expect["ASIC_DB"]["tables_not_found"].append("ASIC_STATE:SAI_OBJECT_TYPE_VNET")
-        ddiff = DeepDiff(returned, expect, ignore_order=True)
-        print(returned)
         assert not ddiff, ddiff
 
     def test_not_working_state(self, match_engine):
-            """
-            Scenario: Missing Entries
-            """
-            params = {Dash_Vnet.ARG_NAME: "Vnet3", "namespace": ""}
-            m_dash_vnet = Dash_Vnet(match_engine)
-            returned = m_dash_vnet.execute(params)
-            expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
-            expect["APPL_DB"]["tables_not_found"].append("DASH_VNET_TABLE")
-            ddiff = DeepDiff(returned, expect, ignore_order=True)
-            print(returned)
-            assert not ddiff, ddiff
+        """
+        Scenario: Missing Keys
+        """
+        params = {Dash_Route_Rule.ARG_NAME: "F4939FEFC47E:2000:10.0.5.0/24", "namespace": ""}
+        m_dash_route_rule = Dash_Route_Rule(match_engine)
+        returned = m_dash_route_rule.execute(params)
+        expect = create_template_dict(dbs=["APPL_DB"])
+        expect["APPL_DB"]["tables_not_found"].append("DASH_ROUTE_RULE_TABLE")
+        ddiff = DeepDiff(returned, expect, ignore_order=True)
+        print(returned)
+        assert not ddiff, ddiff
