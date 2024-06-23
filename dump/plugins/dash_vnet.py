@@ -10,7 +10,7 @@ APPL_DB_SEPARATOR = SonicDBConfig.getSeparator("APPL_DB")
 
 class Dash_Vnet(Executor):
     """
-    Debug Dump Plugin for DASH VNET Mapping
+    Debug Dump Plugin for DASH VNET
     """
     ARG_NAME = "dash_vnet_table"
 

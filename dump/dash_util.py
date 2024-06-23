@@ -2,14 +2,17 @@ import base64
 import uuid
 import socket
 import ipaddress
-import redis
-import argparse
-import sys
-import json
 from google.protobuf.message import Message
-from dash_api.types_pb2 import Guid, IpAddress, IpPrefix
+from dash_api.appliance_pb2 import *
+from dash_api.vnet_pb2 import *
+from dash_api.eni_pb2 import *
+from dash_api.acl_group_pb2 import *
+from dash_api.acl_rule_pb2 import *
+from dash_api.acl_in_pb2 import *
+from dash_api.acl_out_pb2 import *
+from dash_api.prefix_tag_pb2 import *
+from dash_api.types_pb2 import *
 from google.protobuf.json_format import MessageToDict
-
 
 def format_ip(node):
     return str(ipaddress.IPv4Address(socket.ntohl(node)))
@@ -45,6 +48,7 @@ def get_decoded_value(pb, pb_data):
 
 
 decode_types = (IpAddress, Guid, IpPrefix)
+
 decode_fn = {'IpAddress': format_ip_address_dict,
              'Guid': format_guid_dict,
              'mac_address': format_mac,
@@ -54,7 +58,7 @@ decode_fn = {'IpAddress': format_ip_address_dict,
 def find_known_types_sec(pb2_obj, pb2_dict):
 
     def process_msg_field(obj, proto_dict, field_name):
-        class_name = obj.__name__
+        class_name = type(obj).__name__
         if isinstance(obj, decode_types):
             proto_dict[field_name] = decode_fn[class_name](proto_dict[field_name])
         else:
@@ -67,7 +71,7 @@ def find_known_types_sec(pb2_obj, pb2_dict):
             if isinstance(value, Message):
                 if isinstance(value, decode_types):
                     requires_change = True
-                    class_name = value.__name__
+                    class_name = type(value).__name__
                     final_list.append(decode_fn[class_name](proto_dict[field_name][ind]))
                 else:
                     find_index(value, pb2_dict[field_name][ind])
