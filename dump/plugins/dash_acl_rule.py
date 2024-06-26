@@ -12,7 +12,7 @@ class Dash_Acl_Rule(Executor):
     """
     Debug Dump Plugin for DASH ACL Rule
     """
-    ARG_NAME = "dash_acl_rule_table"
+    ARG_NAME = "dash_acl_rule_name"
 
     def __init__(self, match_engine=None):
         super().__init__(match_engine)

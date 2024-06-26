@@ -195,11 +195,13 @@ class TestMatchEngineDash:
         req = MatchRequest(db="APPL_DB", table="DASH_ENI_TABLE", key_pattern="*", pb=Dash_Eni())
         ret = match_engine.fetch(req)
         assert ret["error"] == ""
-        assert len(ret["keys"]) == 1
+        assert len(ret["keys"]) == 2
         assert "DASH_ENI_TABLE:eni0" in ret['keys']
+        assert "DASH_ENI_TABLE:F4939FEFC47E" in ret['keys']
         runner = CliRunner()
         result = runner.invoke(dump.state, ["dash_eni", "all"], obj=match_engine)
         assert result.exit_code == 0, "exit code: {}, Exception: {}, Traceback: {}".format(result.exit_code, result.exception, result.exc_info)
+        print(result)
         expected = {"eni0":
                     {
                         "APPL_DB":
@@ -211,6 +213,27 @@ class TestMatchEngineDash:
                                          "qos": "qos100",
                                          "underlay_ip": "10.0.1.2",
                                          "admin_state": "STATE_ENABLED",
+                                         "vnet": "Vnet5",
+                                         }}],
+                                "tables_not_found": []
+                             },
+                        "ASIC_DB":
+                            {"keys":
+                                [],
+                                "tables_not_found": ["ASIC_STATE:SAI_OBJECT_TYPE_ENI"],
+                             }
+                    },
+                    "F4939FEFC47E":
+                    {
+                        "APPL_DB":
+                            {"keys":
+                                [
+                                    {"DASH_ENI_TABLE:F4939FEFC47E":
+                                        {"eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+                                         "mac_address": "f4:93:9f:ef:c4:7e",
+                                         "qos": "qos100",
+                                         "underlay_ip": "10.0.1.2",
+                                         "admin_state": "STATE_ENABLED",
                                          "vnet": "Vnet1",
                                          }}],
                                 "tables_not_found": []
@@ -218,7 +241,7 @@ class TestMatchEngineDash:
                         "ASIC_DB":
                             {"keys":
                                 [
-                                    {"ASIC_STATE:SAI_OBJECT_TYPE_ENI:oid:0x73000000000022":
+                                    {"ASIC_STATE:SAI_OBJECT_TYPE_ENI:oid:0x73000000000023":
                                         {"SAI_ENI_ATTR_ADMIN_STATE": "true",
                                          "SAI_ENI_ATTR_VM_UNDERLAY_DIP": "10.0.1.2",
                                          "SAI_ENI_ATTR_VM_VNI": "101",
@@ -227,7 +250,7 @@ class TestMatchEngineDash:
                                 "tables_not_found": [],
                                 "vidtorid":
                                 {
-                                    "oid:0x73000000000022": "Real ID Not Found"
+                                    "oid:0x73000000000023": "Real ID Not Found"
                                 }
                              }
                     }
@@ -266,8 +289,9 @@ class TestMatchEngineDash:
         req = MatchRequest(db="APPL_DB", table="DASH_ROUTE_TABLE", key_pattern="*", pb=Dash_Route())
         ret = match_engine.fetch(req)
         assert ret["error"] == ""
-        assert len(ret["keys"]) == 1
+        assert len(ret["keys"]) == 2
         assert "DASH_ROUTE_TABLE:eni0:12.1.1.0/24" in ret['keys']
+        assert "DASH_ROUTE_TABLE:F4939FEFC47E:20.2.2.0/24" in ret['keys']
         runner = CliRunner()
         result = runner.invoke(dump.state, ["dash_route", "all"], obj=match_engine)
         assert result.exit_code == 0, "exit code: {}, Exception: {}, Traceback: {}".format(result.exit_code, result.exception, result.exc_info)
@@ -281,6 +305,33 @@ class TestMatchEngineDash:
                                          "vnet": "Vnet1",
                                          }}],
                                 "tables_not_found": []
+                             },
+                        "ASIC_DB":
+                            {"keys":
+                                [],
+                                "tables_not_found": ["ASIC_STATE:SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY"],
+                             }
+                    },
+                    "F4939FEFC47E:20.2.2.0/24":
+                    {
+                        "APPL_DB":
+                            {"keys":
+                                [
+                                    {"DASH_ROUTE_TABLE:F4939FEFC47E:20.2.2.0/24":
+                                        {"action_type": "ROUTING_TYPE_VNET",
+                                         "vnet": "Vnet2",
+                                         }}],
+                                "tables_not_found": []
+                             },
+                        "ASIC_DB":
+                            {"keys":
+                                [
+                                    {"ASIC_STATE:SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY:{\"destination\":\"20.2.2.0/24\",\"eni_id\":\"oid:0x73000000000023\",\"switch_id\":\"oid:0x21000000000000\"}": {
+                                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION": "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
+                                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID": "oid:0x7a000000000022"
+                                     }}
+                                    ],
+                                "tables_not_found": [],
                              }
                     }
                     }

@@ -13,7 +13,7 @@ class Dash_Acl_Group(Executor):
     """
     Debug Dump Plugin for DASH ACL Group
     """
-    ARG_NAME = "dash_acl_group_table"
+    ARG_NAME = "dash_acl_group_name"
 
     def __init__(self, match_engine=None):
         super().__init__(match_engine)

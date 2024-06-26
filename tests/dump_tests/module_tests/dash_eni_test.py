@@ -55,17 +55,30 @@ def match_engine():
 
 
 @pytest.mark.usefixtures("match_engine")
-class TestDashVnetModule:
+class TestDashEniModule:
     def test_working_state(self, match_engine):
         """
-        Scenario: When the appl info is properly applied and propagated
+        Scenario: When the appl info is properly applied and propagated to ASIC_DB
+        """
+        params = {Dash_Eni.ARG_NAME: "F4939FEFC47E", "namespace": ""}
+        m_dash_vnet = Dash_Eni(match_engine)
+        returned = m_dash_vnet.execute(params)
+        expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
+        expect["APPL_DB"]["keys"].append("DASH_ENI_TABLE:F4939FEFC47E")
+        expect["ASIC_DB"]["keys"].append("ASIC_STATE:SAI_OBJECT_TYPE_ENI:oid:0x73000000000023")
+        ddiff = DeepDiff(returned, expect, ignore_order=True)
+        assert not ddiff, ddiff
+
+    def test_missing_asic_state(self, match_engine):
+        """
+        Scenario: When the appl info is properly applied but not propagated to ASIC_DB
         """
         params = {Dash_Eni.ARG_NAME: "eni0", "namespace": ""}
         m_dash_vnet = Dash_Eni(match_engine)
         returned = m_dash_vnet.execute(params)
         expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
         expect["APPL_DB"]["keys"].append("DASH_ENI_TABLE:eni0")
-        expect["ASIC_DB"]["keys"].append("ASIC_STATE:SAI_OBJECT_TYPE_ENI:oid:0x73000000000022")
+        expect["ASIC_DB"]["tables_not_found"].append("ASIC_STATE:SAI_OBJECT_TYPE_ENI")
         ddiff = DeepDiff(returned, expect, ignore_order=True)
         assert not ddiff, ddiff
 

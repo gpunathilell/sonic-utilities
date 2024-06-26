@@ -11,7 +11,7 @@ class Dash_Vnet_mapping(Executor):
     """
     Debug Dump Plugin for DASH VNET Mapping
     """
-    ARG_NAME = "dash_vnet_mapping_table"
+    ARG_NAME = "dash_vnet_mapping"
 
     def __init__(self, match_engine=None):
         super().__init__(match_engine)

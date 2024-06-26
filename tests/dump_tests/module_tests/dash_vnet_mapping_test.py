@@ -53,7 +53,7 @@ def match_engine():
 
 
 @pytest.mark.usefixtures("match_engine")
-class TestDashAppplianceModule:
+class TestDashVnetMappingModule:
     def test_working_state(self, match_engine):
         """
         Scenario: When the appl info is properly applied and propagated

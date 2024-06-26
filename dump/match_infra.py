@@ -299,7 +299,9 @@ class ConnectionPool:
         """ Returns a SonicV2Connector Object and caches it for further requests """
         if ns not in self.cache:
             self.cache[ns] = {}
+        if CONN  not in self.cache[ns]:
             self.cache[ns][CONN] = self.initialize_connector(ns)
+        if CONN_TO not in self.cache[ns]:
             self.cache[ns][CONN_TO] = set()
         if update or db_name not in self.cache[ns][CONN_TO]:
             self.cache[ns][CONN].connect(db_name)

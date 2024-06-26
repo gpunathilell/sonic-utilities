@@ -9,12 +9,19 @@
     ,
     "DASH_ENI_TABLE:eni0":{
         "pb":
-        "CiQzODZlMTJjNi1lMGFiLTNiODgtYTg3ZS00OGIzNjBkN2I2YWMSBgAAAACqABoGcW9zMTAwIgUNCgABAigCMgVWbmV0MQ=="
+        "CiQzODZlMTJjNi1lMGFiLTNiODgtYTg3ZS00OGIzNjBkN2I2YWMSBgAAAACqABoGcW9zMTAwIgUNCgABAigCMgVWbmV0NQ=="
     },
-    
+    "DASH_ENI_TABLE:F4939FEFC47E":{
+        "pb":
+        "CiQ0OTdmMjNkNy1mMGFjLTRjOTktYTk4Zi01OWI0NzBlOGM3YmQSBvSTn+/EfhoGcW9zMTAwIgUNCgABAigCMgVWbmV0MQ=="
+    },
     "DASH_ROUTE_TABLE:eni0:12.1.1.0/24":{
         "pb":
         "CAISBVZuZXQx"
+    },
+    "DASH_ROUTE_TABLE:F4939FEFC47E:20.2.2.0/24":{
+        "pb":
+        "CAISBVZuZXQy"
     },
     "DASH_ACL_OUT_TABLE:ENI0:1":{
         "pb":"CgZncm91cDE="
