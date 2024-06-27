@@ -80,18 +80,16 @@ class TestDashVnetModule:
         expect["APPL_DB"]["keys"].append("DASH_VNET_TABLE:Vnet2")
         expect["ASIC_DB"]["tables_not_found"].append("ASIC_STATE:SAI_OBJECT_TYPE_VNET")
         ddiff = DeepDiff(returned, expect, ignore_order=True)
-        print(returned)
         assert not ddiff, ddiff
 
     def test_not_working_state(self, match_engine):
-            """
-            Scenario: Missing Entries
-            """
-            params = {Dash_Vnet.ARG_NAME: "Vnet3", "namespace": ""}
-            m_dash_vnet = Dash_Vnet(match_engine)
-            returned = m_dash_vnet.execute(params)
-            expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
-            expect["APPL_DB"]["tables_not_found"].append("DASH_VNET_TABLE")
-            ddiff = DeepDiff(returned, expect, ignore_order=True)
-            print(returned)
-            assert not ddiff, ddiff
+        """
+        Scenario: Missing Entries
+        """
+        params = {Dash_Vnet.ARG_NAME: "Vnet3", "namespace": ""}
+        m_dash_vnet = Dash_Vnet(match_engine)
+        returned = m_dash_vnet.execute(params)
+        expect = create_template_dict(dbs=["APPL_DB", "ASIC_DB"])
+        expect["APPL_DB"]["tables_not_found"].append("DASH_VNET_TABLE")
+        ddiff = DeepDiff(returned, expect, ignore_order=True)
+        assert not ddiff, ddiff

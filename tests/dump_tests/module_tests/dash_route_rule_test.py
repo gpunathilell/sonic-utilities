@@ -23,7 +23,6 @@ dedicated_dbs['APPL_DB'] = os.path.join(dash_input_files_path, "appl_db.json")
 dedicated_dbs['ASIC_DB'] = os.path.join(dash_input_files_path, "asic_db.json")
 
 
-
 @pytest.fixture(scope="class", autouse=True)
 def match_engine():
 
@@ -57,9 +56,8 @@ def match_engine():
 
 
 @pytest.mark.usefixtures("match_engine")
-
 class TestDashRouteRuleModule:
-    
+
     def test_working_state(self, match_engine):
         """
         Scenario: When the appl info is properly applied and propagated

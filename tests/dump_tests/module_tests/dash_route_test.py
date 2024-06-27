@@ -75,7 +75,6 @@ class TestDashRouteModule:
         ddiff = DeepDiff(returned, expect, ignore_order=True)
         assert not ddiff, ddiff
 
-
     def test_working_state(self, match_engine):
         """
         Scenario: When the appl info is properly applied but not propagated to ASIC_DB

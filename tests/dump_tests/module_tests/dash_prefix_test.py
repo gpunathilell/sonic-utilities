@@ -30,7 +30,6 @@ def match_engine():
 
     # Monkey Patch the SonicV2Connector Object
     from ...mock_tables import dbconnector
-    
     db = SonicV2Connector()
 
     # popualate the db with mock data

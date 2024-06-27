@@ -330,7 +330,7 @@ class TestMatchEngineDash:
                                      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION": "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
                                      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID": "oid:0x7a000000000022"
                                      }}
-                                    ],
+                                ],
                                 "tables_not_found": [],
                              }
                     }

@@ -11,6 +11,7 @@ APPL_DB_SEPARATOR = SonicDBConfig.getSeparator("APPL_DB")
 def get_route_pattern(dest, eni_oid):
     return "*\"destination\":\"" + dest + "\",\"eni_id\":\"oid:" + eni_oid + "\"*"
 
+
 class Dash_Route(Executor):
     """
     Debug Dump Plugin for DASH Route
@@ -63,7 +64,6 @@ class Dash_Route(Executor):
         req = MatchRequest(db="ASIC_DB", table="ASIC_STATE:SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY", key_pattern=get_route_pattern(self.dest, eni_oid),
                            ns=self.ns)
         ret = self.match_engine.fetch(req)
-        
         self.add_to_ret_template(req.table, req.db, ret["keys"], ret["error"])
         return
 

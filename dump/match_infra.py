@@ -293,6 +293,8 @@ class ConnectionPool:
         format which is not obtained fully by the SonicV2Connector 
         get_all API
         """
+        # The get_all function for a SonicV2Connector does not support binary data due to which we
+        # have to use the redis Library. Relevant Issue: https://github.com/sonic-net/sonic-swss-common/issues/886
         return redis.Redis(unix_socket_path=SonicDBConfig.getDbSock("APPL_DB", ns), db=SonicDBConfig.getDbId("APPL_DB", ns)) 
 
     def get(self, db_name, ns, update=False):

@@ -14,6 +14,7 @@ from dash_api.prefix_tag_pb2 import *
 from dash_api.types_pb2 import *
 from google.protobuf.json_format import MessageToDict
 
+
 def format_ip(node):
     return str(ipaddress.IPv4Address(socket.ntohl(node)))
 
@@ -63,7 +64,7 @@ def find_known_types_sec(pb2_obj, pb2_dict):
             proto_dict[field_name] = decode_fn[class_name](proto_dict[field_name])
         else:
             find_index(obj, proto_dict[field_name])
-    
+
     def process_rep_field(obj, proto_dict, field_name):
         final_list = []
         requires_change = False

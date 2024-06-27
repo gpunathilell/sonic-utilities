@@ -8,11 +8,13 @@ import ipaddress
 
 APPL_DB_SEPARATOR = SonicDBConfig.getSeparator("APPL_DB")
 
+
 def get_route_rule_pattern(cidr_src_ip, eni_oid, vni, prio):
     network = ipaddress.IPv4Network(cidr_src_ip)
     ip_address = str(network.network_address)
     mask = str(network.netmask)
     return f"*\"eni_id\":\"oid:{eni_oid}\",\"priority\":\"{prio}\",\"sip\":\"{ip_address}\",\"sip_mask\":\"{mask}\",*\"vni\":\"{vni}\"*"
+
 
 class Dash_Route_Rule(Executor):
     """
@@ -56,7 +58,7 @@ class Dash_Route_Rule(Executor):
             self.priority = str(ret['return_values'][ret['keys'][0]]['priority'])
         ret = self.match_engine.fetch(req)
         self.add_to_ret_template(req.table, req.db, ret["keys"], ret["error"])
-    
+
     def init_dash_route_table_asic_info(self):
         if not self.src_ip:
             return
