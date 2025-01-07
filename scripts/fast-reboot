@@ -481,8 +481,13 @@ function check_docker_exec() {
                 fi
                 success=true
                 break
-             else
+	      elif [[ x"${STATE}" == x"timed out" ]]; then
+                # docker exec timed out
                  error "docker exec timed out for $container for $timeout_duration"
+             else
+                # Timeout is the only cause of failure, if docker is down then exit out of loop
+                success=true
+                break
              fi
              timeout_duration=$((timeout_duration + 1))
          done
