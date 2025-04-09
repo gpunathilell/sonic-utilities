@@ -82,7 +82,7 @@ class TestModuleHelper:
         mock_try_get_args.return_value = True
         mock_try_get.return_value = True
         mock_load_platform_chassis.return_value.get_module_index.return_value = 1
-        mock_load_platform_chassis.return_value.get_module.return_value.pci_detach.return_value = True
+        mock_load_platform_chassis.return_value.get_module.return_value.handle_pci_removal.return_value = True
 
         result = module_helper.pci_detach_module("DPU1")
         assert result is True
@@ -98,7 +98,7 @@ class TestModuleHelper:
         mock_try_get_args.return_value = True
         mock_try_get.return_value = True
         mock_load_platform_chassis.return_value.get_module_index.return_value = 1
-        mock_load_platform_chassis.return_value.get_module.return_value.pci_reattach.return_value = True
+        mock_load_platform_chassis.return_value.get_module.return_value.handle_pci_rescan.return_value = True
 
         result = module_helper.pci_reattach_module("DPU1")
         assert result is True

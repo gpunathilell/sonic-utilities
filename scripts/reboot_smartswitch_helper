@@ -68,8 +68,7 @@ function pci_detach_module()
     local DPU_BUS_INFO=$2
     python3 -c "from utilities_common.module import ModuleHelper; helper = ModuleHelper(); helper.pci_detach_module('${DPU_NAME}')"
     if [ $? -ne 0 ]; then
-        log_message "ERROR: PCI detach vendor API is not available"
-        echo 1 > /sys/bus/pci/devices/${DPU_BUS_INFO}/remove
+        log_message "ERROR: PCI detach vendor API failed"
     fi
 }
 
@@ -80,8 +79,7 @@ function pci_reattach_module()
     local DPU_BUS_INFO=$2
     python3 -c "from utilities_common.module import ModuleHelper; helper = ModuleHelper(); helper.pci_reattach_module('${DPU_NAME}')"
     if [ $? -ne 0 ]; then
-        log_message "ERROR: PCI reattach vendor API is not available"
-        echo 1 > /sys/bus/pci/devices/${DPU_BUS_INFO}/rescan
+        log_message "ERROR: PCI reattach vendor API failed"
     fi
 }
 

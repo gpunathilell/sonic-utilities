@@ -92,12 +92,12 @@ class ModuleHelper:
             log.log_error("Unable to get module-index for {}". format(module_name))
             return False
 
-        if not hasattr(self.platform_chassis.get_module(module_index), 'pci_detach'):
+        if not hasattr(self.platform_chassis.get_module(module_index), 'handle_pci_removal'):
             log.log_error("PCI detach method not found in platform chassis")
             return False
 
         log.log_info("Detaching module {}...".format(module_name))
-        status = util.try_get(self.platform_chassis.get_module(module_index).pci_detach, default=False)
+        status = util.try_get(self.platform_chassis.get_module(module_index).handle_pci_removal, default=False)
         if not status:
             log.log_error("PCI detach status for module {}: {}".format(module_name, status))
             return False
@@ -123,12 +123,12 @@ class ModuleHelper:
             log.log_error("Unable to get module-index for {}". format(module_name))
             return False
 
-        if not hasattr(self.platform_chassis.get_module(module_index), 'pci_reattach'):
+        if not hasattr(self.platform_chassis.get_module(module_index), 'handle_pci_rescan'):
             log.log_error("PCI reattach method not found in platform chassis")
             return False
 
         log.log_info("Rescanning module {}...".format(module_name))
-        status = util.try_get(self.platform_chassis.get_module(module_index).pci_reattach, default=False)
+        status = util.try_get(self.platform_chassis.get_module(module_index).handle_pci_rescan, default=False)
         if not status:
             log.log_error("PCI rescan status for module {}: {}".format(module_name, status))
             return False
