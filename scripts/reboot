@@ -59,6 +59,7 @@ function debug()
     if [[ x"${VERBOSE}" == x"yes" ]]; then
         echo `date` $@
     fi
+    echo `date` $@ >> /var/log/reboot.log
     logger "$@"
 }
 
@@ -250,6 +251,8 @@ fi
 debug "User requested rebooting device ..."
 
 handle_smart_switch "$REBOOT_DPU" "$PRE_SHUTDOWN" "$DPU_MODULE_NAME"
+
+debug "handle_smart_switch completed result: $smart_switch_result"
 smart_switch_result=$?
 if [[ $smart_switch_result -ne 0 ]]; then
     exit $smart_switch_result
@@ -263,8 +266,15 @@ fi
 
 check_conflict_boot_in_fw_update
 
+debug "check_conflict_boot_in_fw_update completed"
+
 setup_reboot_variables
+
+debug "setup_reboot_variables completed"
+
 reboot_pre_check
+
+debug "reboot_pre_check completed"
 
 # Tag remotely deployed images as local
 tag_images
@@ -274,6 +284,8 @@ linecard_reboot_notify_supervisor
 
 # Stop SONiC services gracefully.
 stop_sonic_services
+
+debug "stop_sonic_services completed"
 
 # Stop ASAN-enabled services so the report can be generated
 if [[ x"$ASAN" == x"yes" ]]; then
@@ -289,6 +301,8 @@ echo "User issued 'reboot' command [User: ${REBOOT_USER}, Time: ${REBOOT_TIME}]"
 sync
 /sbin/fstrim -av
 sleep 3
+
+debug "clear_warm_boot and sync, sleep completed"
 
 if [[ -x ${DEVPATH}/${PLATFORM}/${PLATFORM_FWUTIL_AU_REBOOT_HANDLE} ]]; then
     debug "Handling task file for boot type ${REBOOT_TYPE}"
@@ -313,6 +327,8 @@ if [ -x ${DEVPATH}/${PLATFORM}/${PRE_REBOOT_HOOK} ]; then
     fi
 fi
 
+debug "pre_reboot_hook completed"
+
 if [ -x ${WATCHDOG_UTIL} ]; then
     debug "Enabling the Watchdog before reboot"
     ${WATCHDOG_UTIL} arm
@@ -322,6 +338,7 @@ if [[ "${PRE_SHUTDOWN}" == "yes" ]]; then
     debug "${DPU_MODULE_NAME} pre-shutdown steps are completed"
     exit ${EXIT_SUCCESS}
 fi
+
 
 if [ -x ${DEVPATH}/${PLATFORM}/${PLAT_REBOOT} ]; then
     VERBOSE=yes debug "Rebooting with platform ${PLATFORM} specific tool ..."
